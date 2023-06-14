@@ -33,7 +33,6 @@ const Container = tw.div`
   justify-center
   p-2
   w-96
-  max-h-96
 `;
 
 const Header = tw.div`

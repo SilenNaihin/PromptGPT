@@ -9,9 +9,6 @@ module.exports = {
     background: path.join(srcDir, 'background.ts'),
     content_script: path.join(srcDir, 'content_script.tsx'),
   },
-  chromeExtensionBoilerplate: {
-    notHotReload: ['background', 'content_script'],
-  },
   output: {
     path: path.join(__dirname, '../dist/js'),
     filename: '[name].js',
