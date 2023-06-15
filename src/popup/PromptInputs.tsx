@@ -7,7 +7,6 @@ interface PromptInputsProps {
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
   handleButtonClick: () => void;
-  isEditing?: boolean;
 }
 
 const PromptInputs: React.FC<PromptInputsProps> = ({
@@ -16,7 +15,6 @@ const PromptInputs: React.FC<PromptInputsProps> = ({
   setTitle,
   setPrompt,
   handleButtonClick,
-  isEditing,
 }) => {
   const pressedEnter = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -39,9 +37,6 @@ const PromptInputs: React.FC<PromptInputsProps> = ({
         placeholder="Enter prompt"
         onKeyDown={(e) => pressedEnter(e)}
       />
-      <AddPromptButton isEditing={isEditing} onClick={handleButtonClick}>
-        Add
-      </AddPromptButton>
     </>
   );
 };
@@ -64,19 +59,5 @@ const PromptArea = tw.textarea`
   resize-none
   border
   rounded-xl
-  h-16
-`;
-
-interface AddPromptProps {
-  isEditing?: boolean;
-}
-
-export const AddPromptButton = tw.button<AddPromptProps>`
-  mr-auto
-  py-1
-  px-2
-  bg-blue-200
-  rounded-xl
-  mt-2
-  ${(props) => (props.isEditing ? 'hidden' : '')}
+  h-24
 `;

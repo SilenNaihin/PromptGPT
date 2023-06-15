@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.Toastify__toast-container {
+  width: 250px;
+  margin-left: auto;
+  margin-right: -10px;
+}
+
+.Toastify__toast {
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+
+html,
+body {
+  max-height: fit-content;
+  overflow: auto;
+  scrollbar-gutter: stable both-edges;
+}

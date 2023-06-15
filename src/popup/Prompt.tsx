@@ -1,9 +1,13 @@
 import React from 'react';
+import { toast } from 'react-toastify';
+import ReactMarkdown from 'react-markdown';
+
 import tw from 'tailwind-styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faCopy, faGear } from '@fortawesome/free-solid-svg-icons';
 
-import PromptInputs, { AddPromptButton } from './PromptInputs';
+import PromptInputs from './PromptInputs';
+import { AddPromptButton } from './Content';
 
 export interface PromptProps {
   title: string;
@@ -13,7 +17,7 @@ export interface PromptProps {
 }
 
 interface PromptBoxProps extends PromptProps {
-  onRemove: () => void;
+  onRemove: (e: React.MouseEvent, index: number) => void;
   handleEdit: (index: number, newTitle: string, newPrompt: string) => void;
   handleButtonClick: () => void;
   index: number;
@@ -36,50 +40,87 @@ const Prompt: React.FC<PromptBoxProps> = ({
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await navigator.clipboard.writeText(prompt);
+
+    toast.success('Copied prompt to clipboard!');
   };
 
   const handleOpenAIPaste = () => {
-    chrome.runtime.sendMessage({
-      action: 'executeScript',
-      prompt: JSON.stringify(prompt),
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const currentTab = tabs[0];
+
+      if (currentTab && currentTab.url?.includes('chat.openai.com')) {
+        console.log(prompt);
+        chrome.runtime.sendMessage(
+          {
+            action: 'executeScript',
+            prompt: prompt,
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error(chrome.runtime.lastError.message);
+              // Maybe show an error toast here
+            } else {
+              // Check response for success, it depends on how your background script handles this
+              if (response.success) {
+                toast.success('Prompt pasted successfully!');
+              } else {
+                // Maybe show an error toast here, if the background script reports an error
+              }
+            }
+          }
+        );
+      } else {
+        toast.error('Cannot paste prompt, please navigate to chat.openai.com');
+      }
     });
   };
 
   return (
-    <PromptBox onClick={handleOpenAIPaste}>
-      {isEditing ? (
-        <>
-          <PromptInputs
-            title={newTitle}
-            setTitle={setNewTitle}
-            prompt={newPrompt}
-            setPrompt={setNewPrompt}
-            handleButtonClick={handleButtonClick}
-            isEditing={isEditing}
-          />
-          <AddPromptButton
-            onClick={() => {
-              handleEdit(index, newTitle, newPrompt);
-              setEditing(false);
-            }}
-          >
-            Done
-          </AddPromptButton>
-        </>
-      ) : (
-        <>
-          <Top>
-            <Title>{title}</Title>
-            <ClickFAWrapper icon={faXmark} onClick={onRemove} />
-          </Top>
-          <PromptText>{prompt}</PromptText>
-          <Bottom>
-            <ClickFAWrapper icon={faGear} onClick={() => setEditing(true)} />
-            <ClickFAWrapper icon={faCopy} onClick={(e) => handleCopy(e)} />
-          </Bottom>
-        </>
-      )}
-    </PromptBox>
+    <>
+      <PromptBox onClick={handleOpenAIPaste}>
+        {isEditing ? (
+          <>
+            <PromptInputs
+              title={newTitle}
+              setTitle={setNewTitle}
+              prompt={newPrompt}
+              setPrompt={setNewPrompt}
+              handleButtonClick={handleButtonClick}
+            />
+            <AddPromptButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit(index, newTitle, newPrompt);
+                setEditing(false);
+              }}
+            >
+              Done
+            </AddPromptButton>
+          </>
+        ) : (
+          <>
+            <Top>
+              <Title>{title}</Title>
+              <ClickFAWrapper
+                icon={faXmark}
+                onClick={(e) => onRemove(e, index)}
+              />
+            </Top>
+            <PromptText children={prompt} />
+            <Bottom>
+              <ClickFAWrapper
+                icon={faGear}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  setEditing(true);
+                }}
+              />
+              <ClickFAWrapper icon={faCopy} onClick={(e) => handleCopy(e)} />
+            </Bottom>
+          </>
+        )}
+      </PromptBox>
+    </>
   );
 };
 
@@ -89,11 +130,12 @@ const PromptBox = tw.div`
   px-2
   py-1
   mt-2
-  max-h-22
+  max-h-28
   border
   rounded-xl
   w-full
   cursor-pointer
+  overflow-y-auto
 `;
 
 const Top = tw.div`
@@ -107,7 +149,7 @@ const Title = tw.h2`
   font-medium
 `;
 
-const PromptText = tw.p`
+const PromptText = tw(ReactMarkdown)`
   text-gray-600
 `;
 

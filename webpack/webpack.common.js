@@ -31,7 +31,6 @@ module.exports = {
       {
         // look for .css or .scss files
         test: /\.css$/,
-        include: [path.resolve(srcDir, 'styles')],
         // in the `src` directory
         use: [
           {

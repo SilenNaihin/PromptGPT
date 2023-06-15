@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Prompt, { PromptProps } from './Prompt';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import tw from 'tailwind-styled-components';
 
 import PromptInputs from './PromptInputs';
@@ -12,15 +15,13 @@ const Content: React.FC = () => {
   const [error, setError] = useState<string>('');
 
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     // Attempt to load the prompts from storage
     chrome.storage.local.get(['prompts'], function (result) {
       if (chrome.runtime.lastError) {
-        // An error occurred
         console.error(chrome.runtime.lastError);
-        setError('There was an error retrieving the prompts');
+        setError('Error retrieving the prompts');
         return;
       }
 
@@ -37,6 +38,7 @@ const Content: React.FC = () => {
       setIsLoaded(true);
     });
   }, []);
+
   const handleButtonClick = () => {
     if (!title || !prompt) {
       console.log('Title or prompt is empty');
@@ -53,24 +55,35 @@ const Content: React.FC = () => {
     const updatedPrompts = [...prompts, newPrompt];
 
     chrome.storage.local.set({ prompts: updatedPrompts }, () => {
-      console.log('Prompt is added');
-      // You can also update the state immediately to reflect changes
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        setError('Error adding the prompt');
+        return;
+      }
       setPrompts(updatedPrompts);
-      // Clear the input fields after adding
       setTitle('');
       setPrompt('');
       setError('');
     });
+
+    toast.success('Prompt successfully added!');
   };
 
-  const handleRemovePrompt = (index: number) => {
+  const handleRemovePrompt = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
     const updatedPrompts = prompts.filter((_, i) => i !== index);
 
     chrome.storage.local.set({ prompts: updatedPrompts }, () => {
-      console.log('Prompt is removed');
-      // Update the state immediately to reflect changes
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        setError('Error removing the prompt');
+        return;
+      }
+
       setPrompts(updatedPrompts);
     });
+
+    toast.success('Prompt successfully removed!');
   };
 
   const handleEditPrompt = (
@@ -88,7 +101,15 @@ const Content: React.FC = () => {
 
       setPrompts(promptsCopy);
     });
+
+    toast.success('Prompt successfully edited!');
   };
+
+  useEffect(() => {
+    if (!error && !error.length) return;
+    toast.error(error);
+    setError('');
+  }, [error]);
 
   if (!isLoaded) {
     return <div>{error || 'Loading...'}</div>;
@@ -103,13 +124,13 @@ const Content: React.FC = () => {
         setPrompt={setPrompt}
         handleButtonClick={handleButtonClick}
       />
-      <Error error={error}>{error}</Error>
-      {prompts ? (
+      <AddPromptButton onClick={handleButtonClick}>Add</AddPromptButton>
+      {prompts.length ? (
         <PromptContainer>
           {prompts.map((prompt, index) => (
             <Prompt
               key={index}
-              onRemove={() => handleRemovePrompt(index)}
+              onRemove={handleRemovePrompt}
               handleEdit={handleEditPrompt}
               index={index}
               handleButtonClick={handleButtonClick}
@@ -138,14 +159,21 @@ interface ErrorProps {
   error: string;
 }
 
-const Error = tw.div<ErrorProps>`
-  text-red-500
-  display: ${(props) => (props.error ? 'block' : 'none')};
-`;
-
 const NoPrompts = tw.div`
   text-center
   text-gray-500
-  text-xl
+  py-6
   font-medium
+`;
+// bg-gradient-to-br from-teal-400 to-blue-500
+export const AddPromptButton = tw.button`
+  bg-gradient-to-br from-purple-400 to-pink-500
+  mr-auto
+  py-1
+  px-3
+  rounded-xl
+  mt-2
+  w-full
+  font-medium
+  text-white
 `;
