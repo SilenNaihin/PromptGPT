@@ -6,7 +6,8 @@ interface PromptInputsProps {
   prompt: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  handleButtonClick: () => void;
+  handleButtonClick?: () => void;
+  handleEdit?: () => void;
 }
 
 const PromptInputs: React.FC<PromptInputsProps> = ({
@@ -15,10 +16,16 @@ const PromptInputs: React.FC<PromptInputsProps> = ({
   setTitle,
   setPrompt,
   handleButtonClick,
+  handleEdit,
 }) => {
   const pressedEnter = (e: React.KeyboardEvent) => {
+    e.stopPropagation();
     if (e.key === 'Enter') {
-      handleButtonClick();
+      if (handleButtonClick) {
+        handleButtonClick();
+      } else {
+        handleEdit;
+      }
     }
   };
 

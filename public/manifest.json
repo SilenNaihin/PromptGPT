@@ -3,7 +3,7 @@
 
   "name": "PromptGPT",
   "description": "Easily save and load templates into ChatGPT. Copy pasting is outdated",
-  "version": "1.0",
+  "version": "0.1",
 
   "options_ui": {
     "page": "options.html"

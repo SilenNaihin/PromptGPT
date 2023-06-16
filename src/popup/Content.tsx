@@ -150,12 +150,17 @@ const Content: React.FC = () => {
 
       {prompts.length ? (
         <>
-          <SearchInput
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by title..."
-          />
+          {prompts.length > 1 ? (
+            <SearchInput
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by title..."
+            />
+          ) : (
+            <></>
+          )}
+
           <PromptContainer>
             {prompts
               .filter((prompt) =>

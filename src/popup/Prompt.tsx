@@ -45,6 +45,8 @@ const Prompt: React.FC<PromptBoxProps> = ({
   };
 
   const handleOpenAIPaste = () => {
+    if (isEditing) return;
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
 
@@ -85,7 +87,7 @@ const Prompt: React.FC<PromptBoxProps> = ({
               setTitle={setNewTitle}
               prompt={newPrompt}
               setPrompt={setNewPrompt}
-              handleButtonClick={handleButtonClick}
+              handleEdit={() => handleEdit(index, newTitle, newPrompt)}
             />
             <AddPromptButton
               onClick={(e) => {
