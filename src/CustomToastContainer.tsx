@@ -7,7 +7,7 @@ const CustomToastContainer: React.FC = () => {
     <ToastContainer
       pauseOnHover={false}
       position="top-right"
-      autoClose={3000}
+      autoClose={1000}
       hideProgressBar={true}
       pauseOnFocusLoss={false}
       draggable

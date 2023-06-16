@@ -77,7 +77,7 @@ const Prompt: React.FC<PromptBoxProps> = ({
 
   return (
     <>
-      <PromptBox onClick={handleOpenAIPaste}>
+      <PromptBox $editing={isEditing} onClick={handleOpenAIPaste}>
         {isEditing ? (
           <>
             <PromptInputs
@@ -126,17 +126,37 @@ const Prompt: React.FC<PromptBoxProps> = ({
 
 export default Prompt;
 
-const PromptBox = tw.div`
+// have to do all of the below in order to get transient props to work with ts
+type DivProps = React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLDivElement>,
+  HTMLDivElement
+>;
+
+interface EditingProp {
+  $editing: boolean;
+}
+
+const PromptBoxBase = tw.div<DivProps>`
   px-2
   py-1
   mt-2
-  max-h-28
   border
   rounded-xl
   w-full
   cursor-pointer
   overflow-y-auto
 `;
+
+const PromptBox: React.FC<DivProps & EditingProp> = ({
+  $editing,
+  ...props
+}) => {
+  return $editing ? (
+    <PromptBoxBase {...props} className="h-fit" />
+  ) : (
+    <PromptBoxBase {...props} className="max-h-28" />
+  );
+};
 
 const Top = tw.div`
   flex
